@@ -1,35 +1,35 @@
-# freenas-iocage-plex
-Scripted installation of Plex Media Server in a FreeNAS jail
+# truenas-core-plex-jail
+Scripted installation of a Plex Media Server in a TrueNAS Core 13.1-RELEASE jail
 
 ## Description
-This is a simple script to automate installation of Plex Media Server in a FreeNAS jail, following current best practices.  It will create a jail, install Plex Media Server (with or without PlexPass), configure Plex to store its preferences and metadata outside the jail, and create a cron job to update the installed packages every week using the FreeBSD `latest` repository rather than `quarterly`.
+This script will:
+- Try to enable Intel Quick Sync Video support i.e. enable hardware transcoding (results may vary)
+- Create a `plex` jail and install Plex Media Server into it (with or without PlexPass)
+- Create the `plex` user and group on the host system (needed for your media dataset ACLs)
+- Configure Plex Media Server to store it's data outside of the jail in a place of your choosing
+- Mount your custom plex data folder and your media storage dataset inside of the jail
+- Create a cron job that updates installed packages every month using the `latest` repository
 
-This script **does not** address media storage for the jail.  That will ordinarily be one or more external datasets on your FreeNAS server, which you can mount to a desired location inside the jail.  Because this depends very much on your data layout and personal preferences, this is left up to the user.
+Note that you still have to apply useful ACLs to your media storage dataset for the `plex` user/group. It will be mounted at `/media` inside of the jail. If you don't take care of your permissions, Plex Media Server may not be able to access your media files.
 
-## Installation
-On your FreeNAS server, change to a convenient directory, and download this script using `git clone https://github.com/danb35/freenas-iocage-plex`.  Then create a configuration file called `plex-config` using your preferred text editor.  In its simplest form, the file would look like this:
+## Installation & Usage
+On your TrueNAS Core server, change to a convenient directory, and download the installation script using `git clone https://github.com/genxiam/truenas-core-plex-jail.git`. Then simply run the script with root privileges:
+
+Usage: `./plex-jail.sh -ph -i 192.168.0.100 -g 192.168.0.1 -d /mnt/tank/plex_data -m /mnt/tank/media`
+
+The following script options are available:
 ```
-JAIL_IP="192.168.1.75"
-DEFAULT_GW_IP="192.168.1.1"
-POOL_PATH="/mnt/tank"
+-p                      # Use PlexPass package (paid, optional)
+-h                      # Use Intel Quick Sync Video hardware (optional)
+-i 192.168.0.100        # The IPv4 address of your jail
+-g 192.168.0.1          # The default gateway of your jail
+-n 24                   # The netmask (defaults to 24, optional)
+-d /mnt/tank/plex_data  # Where to store your plex data (database, metadata, etc)
+-m /mnt/tank/media      # Where to find your media files (mounted read only)
+-j plex                 # The name of your jail (defaults to plex, optional)
 ```
-These values must be set.  They correspond to:
 
-* JAIL_IP and DEFAULT_GW_IP are the IP addresses of the jail and your router, respectively.
-* POOL_PATH is the path for your main data pool's root directory.
-
-Optional configuration values include:
-
-* PLEX_MEDIA_PATH - The path your Plex media files are located in. If set, this script will mount this directory on `/media` inside the jail. Specify a full path, for example "/mnt/tank/Media".
-* USE_HW_TRANSCODE - If set to 1, the script will attempt to configure your system for hardware transcode in Plex. Defaults to 0. Please note that your hardware has to support hardware transcode, and that setting this variable will create a startup script and load a driver. Please see the bottom of this README file for a link to hardware requirements and instructions for Plex hardware transcode on FreeNAS.
-* PLEX_CONFIG_PATH - The path to store your Plex metadata and configuration.  Defaults to `$POOL_PATH/plex_data`.
-* NETMASK - The netmask, in bits, for the network the Plex jail will be on. Defaults to `24`, which is `255.255.255.0`.
-* USE_BETA - If set to 1, the script will download and install the beta version of Plex Media Server.  Defaults to 0.
-
-$PLEX_CONFIG_PATH need not exist before running this script; if it doesn't, the script will create it.  The script will also set ownership of that directory to the user/group IDs for Plex Media Server.  If this directory already exists, it **must not** be using Windows permissions.
-
-Note that if the script creates $PLEX_CONFIG_PATH, it will create it as a **directory**, not as a dataset.  This means that it will not appear in, e.g., the Storage section of the FreeNAS GUI, where you could easily see how much space it's using, compression ratio, etc.  If you want these capabilities, you should create the dataset before running the script, and then ensure that $PLEX_CONFIG_PATH is set appropriately.
-
-Once you've prepared the configuration file, run the script by running `./plex-jail.sh`.  It should run for a few minutes and report completion.  You can then add storage to your jail as desired (see [Uncle Fester's Guide](https://www.familybrown.org/dokuwiki/doku.php?id=fester112:jails_plex#configure_a_mount_point) for one example), and log in to configure your media server.
-
-Note that if you are interested in hardware transcode, instructions for setting this up in FreeNAS 11.3 can be found at https://github.com/kern2011/Freenas-Quicksync .
+## Thanks
+This script is based on the following projects:
+- https://github.com/danb35/freenas-iocage-plex
+- https://github.com/kern2011/Freenas-Quicksync
