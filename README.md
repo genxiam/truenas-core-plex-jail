@@ -10,12 +10,14 @@ This script will:
 - Mount your custom plex data folder and your media storage dataset inside of the jail
 - Create a cron job that updates installed packages every month using the `latest` repository
 
-Note that you still have to apply useful ACLs to your media storage dataset for the `plex` user/group. It will be mounted at `/media` inside of the jail. If you don't take care of your permissions, Plex Media Server may not be able to access your media files.
+Note that you still have to apply useful ACL permissions to your media storage dataset for the `plex` user/group. You can use the TrueNAS Core WebUI to do that. Your media storage dataset will be mounted at `/media` inside of the jail. If you don't take care of your permissions, Plex Media Server may not be able to access your media files.
 
 ## Installation & Usage
-On your TrueNAS Core server, change to a convenient directory, and download the installation script using `git clone https://github.com/genxiam/truenas-core-plex-jail.git`. Then simply run the script with root privileges:
+On your TrueNAS Core server, change to a convenient directory, and download the installation script using:
+`git clone https://github.com/genxiam/truenas-core-plex-jail.git`
 
-Usage: `./plex-jail.sh -ph -i 192.168.0.100 -g 192.168.0.1 -d /mnt/tank/plex_data -m /mnt/tank/media`
+Then simply run the script with root privileges, usage:
+`./plex-jail.sh -ph -i 192.168.0.100 -g 192.168.0.1 -d /mnt/tank/plex_data -m /mnt/tank/media`
 
 The following script options are available:
 ```
