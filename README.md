@@ -29,6 +29,8 @@ The following script options are available:
 -j plex                 # The name of your jail (defaults to plex, optional)
 ```
 
+Note that any additional configuration files, such as `plex-config`, are neither required nor supported any longer.
+
 ## Thanks
 This script is based on the following projects:
 - https://github.com/danb35/freenas-iocage-plex
