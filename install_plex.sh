@@ -2,7 +2,7 @@
 
 # Install Plex Media Server in a TrueNAS Core 13.1-RELEASE jail
 # Get the latest version from https://github.com/genxiam/truenas-core-plex-jail.git
-# Usage: ./plex-jail.sh -ph -i 192.168.0.100 -g 192.168.0.1 -d /mnt/tank/plex_data -m /mnt/tank/media
+# Usage: ./install_plex.sh -ph -i 192.168.0.100 -g 192.168.0.1 -d /mnt/tank/plex_data -m /mnt/tank/media
 
 # Init user variables
 USE_PLEXPASS=0      # -p
@@ -31,17 +31,17 @@ fi
 
 # Validate an IPv4 address format
 is_valid_ip() {
-    local ip="$1"
-    local regex="^([0-9]{1,3}\.){3}[0-9]{1,3}$"
+  local ip="$1"
+  local regex="^([0-9]{1,3}\.){3}[0-9]{1,3}$"
 
-    if echo "$ip" | grep -Eq "$regex"; then
-        # Ensure each number is between 0-255
-        local IFS="."
-        set -- $ip
-        [ "$1" -le 255 ] && [ "$2" -le 255 ] && [ "$3" -le 255 ] && [ "$4" -le 255 ]
+  if echo "$ip" | grep -Eq "$regex"; then
+    # Ensure each number is between 0-255
+    local IFS="."
+      set -- $ip
+      [ "$1" -le 255 ] && [ "$2" -le 255 ] && [ "$3" -le 255 ] && [ "$4" -le 255 ]
     else
-        return 1
-    fi
+      return 1
+  fi
 }
 
 # Validate an IPv4 netmask in integer format
@@ -209,18 +209,18 @@ if [ ${USE_IQSV} -eq 1 ]; then
 fi
 
 # Create iocage jail
-echo "Creating Plex Media Server jail. This may take a while."
+echo "Creating ${JAIL_NAME} jail. This may take a while."
 JAIL_EXISTS="$(iocage list | grep "${JAIL_NAME}")"
 if [ -n "${JAIL_EXISTS}" ]; then
-  echo "Error: Jail with name \"${JAIL_NAME}\" already exists"
+  echo "Error: Jail with name ${JAIL_NAME} already exists"
   exit 1
 fi
 if ! iocage create -b -n "${JAIL_NAME}" -r "${VERSION}" ip4_addr="vnet0|${JAIL_IP}/${NETMASK}" defaultrouter="${GW_IP}" host_hostname="${JAIL_NAME}" vnet=1 boot=0 "${DEVFS_RULESET}"
 then
-  echo "Error: Failed to create Plex Media Server jail"
+  echo "Error: Failed to create ${JAIL_NAME} jail"
   exit 1
 fi
-echo "Starting jail ${JAIL_NAME} for the first time"
+echo "Starting ${JAIL_NAME} jail for the first time"
 iocage start "${JAIL_NAME}"
 
 # Set pkg repos from quarterly to latest and configure pkg.conf
@@ -259,9 +259,11 @@ chown -R ${PLEX_ID}:${PLEX_ID} "${PLEX_DATA_PATH}"
 iocage exec "${JAIL_NAME}" mkdir -p /plex
 iocage fstab -a "${JAIL_NAME}" "${PLEX_DATA_PATH}" /plex nullfs rw 0 0
 iocage fstab -a "${JAIL_NAME}" "${PLEX_MEDIA_PATH}" /media nullfs ro 0 0
-echo "Added mount points for plex data and media folders"
+echo "Added mount point for ${PLEX_DATA_PATH} -> /plex folder"
+echo "Added mount point for ${PLEX_MEDIA_PATH} -> /media folder (read only)"
 
 # Install Plex Media Server
+echo
 echo "Installing ${PLEX_PKG}. This may take a while."
 if ! iocage exec "${JAIL_NAME}" pkg install "${PLEX_PKG}"
 then
@@ -285,11 +287,11 @@ fi
 if [ ${USE_PLEXPASS} -eq 1 ]; then
   iocage exec "${JAIL_NAME}" sysrc plexmediaserver_plexpass_enable="YES"
   iocage exec "${JAIL_NAME}" sysrc plexmediaserver_plexpass_support_path="/plex"
-  iocage exec "${JAIL_NAME}" "echo '20 4 1 * * pkg upgrade -y && service plexmediaserver_plexpass restart' | crontab -"
+  iocage exec "${JAIL_NAME}" "echo '0 6 1 * * pkg upgrade -y && service plexmediaserver_plexpass restart' | crontab -"
 else
   iocage exec "${JAIL_NAME}" sysrc plexmediaserver_enable="YES"
   iocage exec "${JAIL_NAME}" sysrc plexmediaserver_support_path="/plex"
-  iocage exec "${JAIL_NAME}" "echo '20 4 1 * * pkg upgrade -y && service plexmediaserver restart' | crontab -"
+  iocage exec "${JAIL_NAME}" "echo '0 6 1 * * pkg upgrade -y && service plexmediaserver restart' | crontab -"
 fi
 echo "Configured to check for latest updates on a monthly schedule"
 
