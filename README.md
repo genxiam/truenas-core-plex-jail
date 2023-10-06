@@ -1,8 +1,8 @@
 # truenas-core-scripts
 Scripted installations of Plex Media Server, SABnzbd and Transmission in TrueNAS Core 13.1-RELEASE jails
 
-## Installation
-On your TrueNAS Core server change to a convenient directory and download the installation scripts using git:
+## Get the scripts
+On your TrueNAS Core server change to a convenient directory and download the installation scripts using git:  
 `git clone https://github.com/genxiam/truenas-core-scripts.git`
 
 ## Description: `install_plex.sh`
@@ -15,7 +15,7 @@ This script will:
 - Create a cron job that updates installed packages every month using the `latest` repository
 
 ## Usage: `install_plex.sh`
-Simply run the following script with root privileges, usage:
+Simply run the following script with root privileges, usage:  
 `./install_plex.sh -ph -i 192.168.0.100 -g 192.168.0.1 -d /mnt/tank/plex_data -m /mnt/tank/media`
 
 The following script options are available:
@@ -40,7 +40,7 @@ This script will:
 - Create a cron job that updates installed packages every month using the `latest` repository
 
 ## Usage: `install_sabnzbd.sh`
-Simply run the following script with root privileges, usage:
+Simply run the following script with root privileges, usage:  
 `./install_sabnzbd.sh -i 192.168.0.110 -g 192.168.0.1 -d /mnt/tank/usenet`
 
 The following script options are available:
@@ -60,7 +60,7 @@ This script will:
 - Create a cron job that updates installed packages every month using the `latest` repository
 
 ## Usage: `install_transmission.sh`
-Simply run the following script with root privileges, usage:
+Simply run the following script with root privileges, usage:  
 `./install_transmission.sh -i 192.168.0.120 -g 192.168.0.1 -d /mnt/tank/torrents`
 
 The following script options are available:
@@ -72,7 +72,7 @@ The following script options are available:
 -j transmission         # The name of your jail (defaults to transmission, optional)
 ```
 
-## Notes
+## About permissions
 You still have to manually apply useful ACL permissions to your data storage datasets for the `plex`, `sabnzbd` and `transmission` users/groups. You can use the TrueNAS Core WebUI to do that. Your data storage datasets will be mounted at `/media` inside of the jails. If you don't take care of your permissions, you may not be able to access your data properly.
 
 ## Thanks
